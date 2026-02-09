@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הזמנת חדר התכנסות קהילתי</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .calendar-section, .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .calendar-nav button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .calendar-nav h3 {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            background: white;
+            font-weight: 500;
+        }
+
+        .calendar-day:hover:not(.other-month):not(.past-day) {
+            background: #e8eaf6;
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .calendar-day.other-month {
+            color: #ccc;
+            cursor: default;
+        }
+
+        .calendar-day.past-day {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.has-bookings {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .calendar-day.has-bookings::after {
+            content: '●';
+            position: absolute;
+            bottom: 2px;
+            font-size: 8px;
+            color: #ff9800;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .radio-option input[type="radio"] {
+            width: auto;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .radio-option.selected {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .booking-type-option {
+            transition: all 0.3s;
+        }
+
+        .booking-type-option:hover {
+            border-color: #667eea !important;
+            background: #f5f7ff;
+        }
+
+        .booking-type-option input[type="radio"]:checked {
+            accent-color: #667eea;
+        }
+
+        .booking-type-option:has(input[type="radio"]:checked) {
+            border-color: #667eea !important;
+            background: #e8eaf6;
+        }
+
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .day-checkbox:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .day-checkbox input[type="checkbox"] {
+            margin-left: 8px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .day-checkbox:has(input[type="checkbox"]:checked) {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .notice {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .notice strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .error {
+            color: #c62828;
+            font-size: 0.9em;
+            margin-top: 5px;
+            background: #ffcdd2;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .bookings-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .booking-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .booking-item-header {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .booking-item-details {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ הזמנת חדר התכנסות קהילתי</h1>
+            <p>בחר תאריך ומלא את הפרטים להזמנת החדר</p>
+        </div>
+
+        <div class="content">
+            <!-- Calendar Section -->
+            <div class="calendar-section">
+                <h2 class="section-title">📅 לוח שנה</h2>
+                
+                <div class="calendar-nav">
+                    <button onclick="previousMonth()">← חודש קודם</button>
+                    <h3 id="currentMonthYear"></h3>
+                    <button onclick="nextMonth()">חודש הבא →</button>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid"></div>
+
+                <div id="selectedDateInfo" class="hidden">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">הזמנות ליום <span id="selectedDateText"></span></h3>
+                    <div id="bookingsList" class="bookings-list"></div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="form-section">
+                <h2 class="section-title">📝 טופס הזמנה</h2>
+                
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label>תאריך נבחר: <span id="selectedDateDisplay" style="color: #667eea; font-weight: bold;">לא נבחר</span></label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>סוג הזמנה:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <label style="display: flex; align-items: center; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; flex: 1;" class="booking-type-option" id="oneTimeOption">
+                                <input type="radio" name="bookingRecurrence" value="onetime" checked style="margin-left: 10px;">
+                                <span>הזמנה חד-פעמית</span>
+                            </label>
+                            <label style="display: flex; align-items: center; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; flex: 1;" class="booking-type-option" id="recurringOption">
+                                <input type="radio" name="bookingRecurrence" value="recurring" style="margin-left: 10px;">
+                                <span>הזמנה חוזרת</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="recurringOptions" class="form-group hidden">
+                        <label>תדירות:</label>
+                        <select id="recurrencePattern">
+                            <option value="">בחר תדירות</option>
+                            <option value="weekly">שבועי</option>
+                            <option value="biweekly">דו-שבועי</option>
+                            <option value="monthly">חודשי</option>
+                        </select>
+
+                        <div id="weeklyOptions" class="hidden" style="margin-top: 15px;">
+                            <label style="display: block; margin-bottom: 10px;">בחר ימים:</label>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;">
+                                <label class="day-checkbox">
+                                    <input type="checkbox" name="recurringDays" value="0">
+                                    <span>ראשון</span>
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" name="recurringDays" value="1">
+                                    <span>שני</span>
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" name="recurringDays" value="2">
+                                    <span>שלישי</span>
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" name="recurringDays" value="3">
+                                    <span>רביעי</span>
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" name="recurringDays" value="4">
+                                    <span>חמישי</span>
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" name="recurringDays" value="5">
+                                    <span>שישי</span>
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" name="recurringDays" value="6">
+                                    <span>שבת</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="monthlyOptions" class="hidden" style="margin-top: 15px;">
+                            <label>תבנית חודשית:</label>
+                            <select id="monthlyPattern">
+                                <option value="dayOfMonth">באותו תאריך בחודש</option>
+                                <option value="dayOfWeek">באותו יום בשבוע (למשל: שלישי שני בחודש)</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <label>תאריך סיום:</label>
+                            <input type="date" id="recurrenceEndDate">
+                            <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                                עד איזה תאריך ההזמנה החוזרת תימשך
+                            </div>
+                        </div>
+
+                        <div id="recurrencePreview" class="hidden" style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50;">
+                            <strong style="color: #2e7d32; display: block; margin-bottom: 8px;">תצוגה מקדימה של ההזמנות:</strong>
+                            <div id="previewDates" style="font-size: 0.9em; color: #333; max-height: 150px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>שעת התחלה: *</label>
+                        <select id="startTime" required>
+                            <option value="">בחר שעת התחלה</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>שעת סיום: *</label>
+                        <select id="endTime" required>
+                            <option value="">בחר שעת סיום</option>
+                        </select>
+                    </div>
+
+                    <div id="timeConflictWarning" class="error hidden">
+                        ⚠️ קיימת התנגשות עם הזמנה קיימת בזמן שנבחר
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bookerName">שם המזמין: *</label>
+                        <input type="text" id="bookerName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phoneNumber">מספר טלפון: *</label>
+                        <input type="tel" id="phoneNumber" required pattern="[0-9\-]{9,12}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">אימייל: *</label>
+                        <input type="email" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>סיבת ההזמנה: *</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="reason" value="50+" required>
+                                <span>50+</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="reason" value="ועד הנהלה" required>
+                                <span>ועד הנהלה</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="reason" value="ועדה או צוות יישובי" required>
+                                <span>ועדה או צוות יישובי</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="reason" value="חוג" required>
+                                <span>חוג</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="reason" value="אירוע פרטי" required>
+                                <span>אירוע פרטי</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group hidden" id="additionalInfoGroup">
+                        <label for="additionalInfo">נא פרט על אופי המפגש: *</label>
+                        <textarea id="additionalInfo" rows="4"></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">שלח בקשה</button>
+
+                    <div class="notice">
+                        <strong>⚠️ שים לב:</strong>
+                        לחיצה על "שלח בקשה" מעבירה את הבקשה לצוות האחראי על חדר ההתכנסות. 
+                        האישור יישלח באימייל רק לאחר שהצוות יבדוק את הבקשה ויוודא שהיא עומדת בנוהל חדר התכנסות קהילתי.
+                    </div>
+                </form>
+
+                <div id="successMessage" class="success-message hidden">
+                    ✅ הבקשה נשלחה בהצלחה! תקבל אישור באימייל לאחר בדיקת הבקשה.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = null;
+        const hebrewMonths = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+        const hebrewDays = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
+        
+        // LocalStorage functions
+        function saveToStorage(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function getFromStorage(key) {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : null;
+        }
+
+        function getAllBookings() {
+            const bookings = getFromStorage('allBookings');
+            return bookings || [];
+        }
+
+        function saveBooking(booking) {
+            const bookings = getAllBookings();
+            bookings.push(booking);
+            saveToStorage('allBookings', bookings);
+        }
+
+        // Generate time slots (7:00 - 22:30)
+        function generateTimeSlots() {
+            const slots = [];
+            for (let hour = 7; hour <= 22; hour++) {
+                slots.push(`${hour.toString().padStart(2, '0')}:00`);
+                if (hour < 22 || hour === 22) {
+                    slots.push(`${hour.toString().padStart(2, '0')}:30`);
+                }
+            }
+            return slots;
+        }
+
+        const timeSlots = generateTimeSlots();
+
+        // Recurring booking event listeners
+        document.querySelectorAll('input[name="bookingRecurrence"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const recurringOptions = document.getElementById('recurringOptions');
+                if (this.value === 'recurring') {
+                    recurringOptions.classList.remove('hidden');
+                } else {
+                    recurringOptions.classList.add('hidden');
+                    document.getElementById('recurrencePreview').classList.add('hidden');
+                }
+            });
+        });
+
+        document.getElementById('recurrencePattern').addEventListener('change', function() {
+            const weeklyOptions = document.getElementById('weeklyOptions');
+            const monthlyOptions = document.getElementById('monthlyOptions');
+            
+            weeklyOptions.classList.add('hidden');
+            monthlyOptions.classList.add('hidden');
+            
+            if (this.value === 'weekly' || this.value === 'biweekly') {
+                weeklyOptions.classList.remove('hidden');
+            } else if (this.value === 'monthly') {
+                monthlyOptions.classList.remove('hidden');
+            }
+            
+            updateRecurrencePreview();
+        });
+
+        document.getElementById('recurrenceEndDate').addEventListener('change', updateRecurrencePreview);
+        
+        document.querySelectorAll('input[name="recurringDays"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateRecurrencePreview);
+        });
+
+        document.getElementById('monthlyPattern').addEventListener('change', updateRecurrencePreview);
+
+        // Update recurrence preview
+        function updateRecurrencePreview() {
+            if (!selectedDate) return;
+            
+            const pattern = document.getElementById('recurrencePattern').value;
+            const endDate = document.getElementById('recurrenceEndDate').value;
+            
+            if (!pattern || !endDate) {
+                document.getElementById('recurrencePreview').classList.add('hidden');
+                return;
+            }
+            
+            const dates = generateRecurringDates();
+            
+            if (dates.length === 0) {
+                document.getElementById('recurrencePreview').classList.add('hidden');
+                return;
+            }
+            
+            document.getElementById('recurrencePreview').classList.remove('hidden');
+            const previewDates = document.getElementById('previewDates');
+            
+            previewDates.innerHTML = dates.slice(0, 20).map(date => {
+                const d = new Date(date);
+                return `<div style="padding: 4px 0;">📅 ${d.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`;
+            }).join('');
+            
+            if (dates.length > 20) {
+                previewDates.innerHTML += `<div style="padding: 4px 0; color: #666; font-style: italic;">... ועוד ${dates.length - 20} תאריכים</div>`;
+            }
+            
+            previewDates.innerHTML += `<div style="padding: 8px 0; font-weight: bold; color: #2e7d32; border-top: 1px solid #4caf50; margin-top: 8px;">סה"כ: ${dates.length} הזמנות</div>`;
+        }
+
+        // Generate recurring dates
+        function generateRecurringDates() {
+            if (!selectedDate) return [];
+            
+            const pattern = document.getElementById('recurrencePattern').value;
+            const endDateStr = document.getElementById('recurrenceEndDate').value;
+            
+            if (!pattern || !endDateStr) return [];
+            
+            const startDate = new Date(selectedDate);
+            const endDate = new Date(endDateStr);
+            endDate.setHours(23, 59, 59);
+            
+            const dates = [];
+            
+            if (pattern === 'weekly') {
+                const selectedDays = Array.from(document.querySelectorAll('input[name="recurringDays"]:checked')).map(cb => parseInt(cb.value));
+                if (selectedDays.length === 0) return [];
+                
+                let currentDate = new Date(startDate);
+                currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // Start of week
+                
+                while (currentDate <= endDate) {
+                    selectedDays.forEach(day => {
+                        const dateToAdd = new Date(currentDate);
+                        dateToAdd.setDate(currentDate.getDate() + day);
+                        
+                        if (dateToAdd >= startDate && dateToAdd <= endDate) {
+                            dates.push(dateToAdd.toISOString().split('T')[0]);
+                        }
+                    });
+                    
+                    currentDate.setDate(currentDate.getDate() + 7);
+                }
+            } else if (pattern === 'biweekly') {
+                const selectedDays = Array.from(document.querySelectorAll('input[name="recurringDays"]:checked')).map(cb => parseInt(cb.value));
+                if (selectedDays.length === 0) return [];
+                
+                let currentDate = new Date(startDate);
+                currentDate.setDate(currentDate.getDate() - currentDate.getDay());
+                
+                while (currentDate <= endDate) {
+                    selectedDays.forEach(day => {
+                        const dateToAdd = new Date(currentDate);
+                        dateToAdd.setDate(currentDate.getDate() + day);
+                        
+                        if (dateToAdd >= startDate && dateToAdd <= endDate) {
+                            dates.push(dateToAdd.toISOString().split('T')[0]);
+                        }
+                    });
+                    
+                    currentDate.setDate(currentDate.getDate() + 14);
+                }
+            } else if (pattern === 'monthly') {
+                const monthlyPattern = document.getElementById('monthlyPattern').value;
+                let currentDate = new Date(startDate);
+                
+                if (monthlyPattern === 'dayOfMonth') {
+                    // Same day of month (e.g., 15th of each month)
+                    const dayOfMonth = startDate.getDate();
+                    
+                    while (currentDate <= endDate) {
+                        const testDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayOfMonth);
+                        
+                        if (testDate >= startDate && testDate <= endDate && testDate.getDate() === dayOfMonth) {
+                            dates.push(testDate.toISOString().split('T')[0]);
+                        }
+                        
+                        currentDate.setMonth(currentDate.getMonth() + 1);
+                    }
+                } else if (monthlyPattern === 'dayOfWeek') {
+                    // Same day of week and week number (e.g., second Tuesday)
+                    const dayOfWeek = startDate.getDay();
+                    const weekOfMonth = Math.floor((startDate.getDate() - 1) / 7);
+                    
+                    while (currentDate <= endDate) {
+                        const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                        const firstTargetDay = firstDayOfMonth.getDate() + (dayOfWeek - firstDayOfMonth.getDay() + 7) % 7;
+                        const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), firstTargetDay + (weekOfMonth * 7));
+                        
+                        if (targetDate.getMonth() === currentDate.getMonth() && targetDate >= startDate && targetDate <= endDate) {
+                            dates.push(targetDate.toISOString().split('T')[0]);
+                        }
+                        
+                        currentDate.setMonth(currentDate.getMonth() + 1);
+                    }
+                }
+            }
+            
+            return dates.sort();
+        }
+
+        // Populate time dropdowns
+        function populateTimeDropdowns() {
+            const startTimeSelect = document.getElementById('startTime');
+            const endTimeSelect = document.getElementById('endTime');
+            
+            startTimeSelect.innerHTML = '<option value="">בחר שעת התחלה</option>';
+            endTimeSelect.innerHTML = '<option value="">בחר שעת סיום</option>';
+            
+            timeSlots.forEach(slot => {
+                const startOption = document.createElement('option');
+                startOption.value = slot;
+                startOption.textContent = slot;
+                startTimeSelect.appendChild(startOption);
+                
+                const endOption = document.createElement('option');
+                endOption.value = slot;
+                endOption.textContent = slot;
+                endTimeSelect.appendChild(endOption);
+            });
+        }
+
+        // Check time conflict
+        function checkTimeConflict() {
+            if (!selectedDate) return false;
+            
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            if (!startTime || !endTime) return false;
+            
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            const bookings = getAllBookings();
+            const dayBookings = bookings.filter(b => b.date === dateStr);
+            
+            const startMinutes = timeToMinutes(startTime);
+            const endMinutes = timeToMinutes(endTime);
+            
+            for (const booking of dayBookings) {
+                const bookingStart = timeToMinutes(booking.startTime);
+                const bookingEnd = timeToMinutes(booking.endTime);
+                
+                // Check for overlap
+                if ((startMinutes >= bookingStart && startMinutes < bookingEnd) ||
+                    (endMinutes > bookingStart && endMinutes <= bookingEnd) ||
+                    (startMinutes <= bookingStart && endMinutes >= bookingEnd)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        // Event listeners for time selection
+        document.getElementById('startTime').addEventListener('change', () => {
+            const hasConflict = checkTimeConflict();
+            document.getElementById('timeConflictWarning').classList.toggle('hidden', !hasConflict);
+        });
+
+        document.getElementById('endTime').addEventListener('change', () => {
+            const hasConflict = checkTimeConflict();
+            document.getElementById('timeConflictWarning').classList.toggle('hidden', !hasConflict);
+        });
+
+        // Render calendar
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('currentMonthYear').textContent = `${hebrewMonths[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstDayOfWeek = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            // Add day headers
+            hebrewDays.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+            
+            // Load bookings
+            const bookings = getAllBookings();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day other-month';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                const cellDate = new Date(year, month, day);
+                cellDate.setHours(0, 0, 0, 0);
+                const dateStr = cellDate.toISOString().split('T')[0];
+                
+                // Check if past date
+                if (cellDate < today) {
+                    dayElement.classList.add('past-day');
+                } else {
+                    // Check if has bookings
+                    const dayBookings = bookings.filter(b => b.date === dateStr);
+                    if (dayBookings.length > 0) {
+                        dayElement.classList.add('has-bookings');
+                    }
+                    
+                    dayElement.onclick = () => selectDate(cellDate);
+                }
+                
+                if (selectedDate && cellDate.getTime() === selectedDate.getTime()) {
+                    dayElement.classList.add('selected');
+                }
+                
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        // Select date
+        function selectDate(date) {
+            selectedDate = date;
+            const dateStr = date.toISOString().split('T')[0];
+            const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+            
+            document.getElementById('selectedDateDisplay').textContent = formattedDate;
+            document.getElementById('selectedDateText').textContent = formattedDate;
+            
+            renderCalendar();
+            displayBookingsForDate(dateStr);
+        }
+
+        // Display bookings for selected date
+        function displayBookingsForDate(dateStr) {
+            const bookings = getAllBookings();
+            const dayBookings = bookings.filter(b => b.date === dateStr);
+            
+            const bookingsList = document.getElementById('bookingsList');
+            const selectedDateInfo = document.getElementById('selectedDateInfo');
+            
+            if (dayBookings.length === 0) {
+                selectedDateInfo.classList.add('hidden');
+                return;
+            }
+            
+            selectedDateInfo.classList.remove('hidden');
+            bookingsList.innerHTML = '';
+            
+            dayBookings.forEach(booking => {
+                const item = document.createElement('div');
+                item.className = 'booking-item';
+                
+                const timeInfo = `${booking.startTime} - ${booking.endTime}`;
+                
+                item.innerHTML = `
+                    <div class="booking-item-header">${booking.reason}</div>
+                    <div class="booking-item-details">
+                        שעות: ${timeInfo}<br>
+                        שם: ${booking.bookerName}<br>
+                        טלפון: ${booking.phoneNumber}<br>
+                        אימייל: ${booking.email}
+                        ${booking.additionalInfo ? `<br>פרטים: ${booking.additionalInfo}` : ''}
+                    </div>
+                `;
+                
+                bookingsList.appendChild(item);
+            });
+        }
+
+        // Previous month
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        // Next month
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // Form handling
+        document.querySelectorAll('input[name="reason"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.radio-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.parentElement.classList.add('selected');
+                
+                const additionalInfoGroup = document.getElementById('additionalInfoGroup');
+                const additionalInfoInput = document.getElementById('additionalInfo');
+                
+                if (['חוג', 'ועדה או צוות יישובי', 'אירוע פרטי'].includes(this.value)) {
+                    additionalInfoGroup.classList.remove('hidden');
+                    additionalInfoInput.required = true;
+                } else {
+                    additionalInfoGroup.classList.add('hidden');
+                    additionalInfoInput.required = false;
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedDate) {
+                alert('נא לבחור תאריך');
+                return;
+            }
+            
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            if (!startTime || !endTime) {
+                alert('נא לבחור שעת התחלה ושעת סיום');
+                return;
+            }
+            
+            if (timeToMinutes(startTime) >= timeToMinutes(endTime)) {
+                alert('שעת הסיום חייבת להיות אחרי שעת ההתחלה');
+                return;
+            }
+            
+            const isRecurring = document.querySelector('input[name="bookingRecurrence"]:checked').value === 'recurring';
+            let datesToBook = [selectedDate.toISOString().split('T')[0]];
+            let recurrenceInfo = null;
+            
+            if (isRecurring) {
+                const pattern = document.getElementById('recurrencePattern').value;
+                const endDate = document.getElementById('recurrenceEndDate').value;
+                
+                if (!pattern || !endDate) {
+                    alert('נא למלא את כל פרטי ההזמנה החוזרת');
+                    return;
+                }
+                
+                datesToBook = generateRecurringDates();
+                
+                if (datesToBook.length === 0) {
+                    alert('לא נמצאו תאריכים תקפים להזמנה חוזרת');
+                    return;
+                }
+                
+                recurrenceInfo = {
+                    pattern: pattern,
+                    endDate: endDate,
+                    selectedDays: Array.from(document.querySelectorAll('input[name="recurringDays"]:checked')).map(cb => parseInt(cb.value)),
+                    monthlyPattern: document.getElementById('monthlyPattern').value
+                };
+            }
+            
+            // Check for conflicts
+            const conflicts = [];
+            datesToBook.forEach(dateStr => {
+                const bookings = getAllBookings();
+                const dayBookings = bookings.filter(b => b.date === dateStr);
+                
+                const startMinutes = timeToMinutes(startTime);
+                const endMinutes = timeToMinutes(endTime);
+                
+                for (const booking of dayBookings) {
+                    const bookingStart = timeToMinutes(booking.startTime);
+                    const bookingEnd = timeToMinutes(booking.endTime);
+                    
+                    if ((startMinutes >= bookingStart && startMinutes < bookingEnd) ||
+                        (endMinutes > bookingStart && endMinutes <= bookingEnd) ||
+                        (startMinutes <= bookingStart && endMinutes >= bookingEnd)) {
+                        conflicts.push(dateStr);
+                        break;
+                    }
+                }
+            });
+            
+            if (conflicts.length > 0) {
+                const conflictDates = conflicts.slice(0, 5).map(d => new Date(d).toLocaleDateString('he-IL')).join(', ');
+                const message = `קיימות התנגשויות בתאריכים הבאים:\n${conflictDates}${conflicts.length > 5 ? `\nועוד ${conflicts.length - 5} תאריכים` : ''}\n\nהאם להמשיך ולהזמין רק את התאריכים הפנויים?`;
+                
+                if (!confirm(message)) {
+                    return;
+                }
+                
+                // Remove conflicting dates
+                datesToBook = datesToBook.filter(d => !conflicts.includes(d));
+                
+                if (datesToBook.length === 0) {
+                    alert('אין תאריכים פנויים להזמנה');
+                    return;
+                }
+            }
+            
+            const baseId = 'booking_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            datesToBook.forEach((dateStr, index) => {
+                const formData = {
+                    date: dateStr,
+                    startTime: startTime,
+                    endTime: endTime,
+                    bookerName: document.getElementById('bookerName').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    email: document.getElementById('email').value,
+                    reason: document.querySelector('input[name="reason"]:checked').value,
+                    additionalInfo: document.getElementById('additionalInfo').value,
+                    timestamp: new Date().toISOString(),
+                    status: 'pending',
+                    id: baseId + '_' + index,
+                    isRecurring: isRecurring,
+                    recurringGroupId: isRecurring ? baseId : null,
+                    recurrenceInfo: recurrenceInfo
+                };
+                
+                saveBooking(formData);
+            });
+            
+            const message = isRecurring 
+                ? `✅ נוצרו ${datesToBook.length} הזמנות חוזרות בהצלחה!`
+                : '✅ הבקשה נשלחה בהצלחה!';
+            
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successMessage').classList.remove('hidden');
+            document.getElementById('bookingForm').reset();
+            document.getElementById('timeConflictWarning').classList.add('hidden');
+            document.getElementById('additionalInfoGroup').classList.add('hidden');
+            document.getElementById('recurringOptions').classList.add('hidden');
+            document.getElementById('recurrencePreview').classList.add('hidden');
+            document.querySelectorAll('.radio-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            renderCalendar();
+            if (selectedDate) {
+                displayBookingsForDate(selectedDate.toISOString().split('T')[0]);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('successMessage').classList.add('hidden');
+            }, 5000);
+        });
+
+        // Initialize
+        populateTimeDropdowns();
+        renderCalendar();
+    </script>
+</body>
+</html>
